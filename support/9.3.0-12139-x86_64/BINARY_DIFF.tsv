@@ -9,6 +9,8 @@ lib/libssutils.so	0x589dc2	6865636b2e7068703f6473534e3d	6f6d00000000000000000000
 lib/libssutils.so	0x589e08	73796e6f7375727665696c6c616e63652e73796e6f6c6f67792e636f6d	3139322e3136382e3235302e3235300000000000000000000000000000	license service host
 sbin/sscmshostd	0x225e0	534889	31c0c3	CmsCommMgr periodic method: return success
 sbin/sscmshostd	0x23540	415455	31c0c3	CMS validation helper: return success
+sbin/sscamerad	0xb58a9	751d	eb45	jump directly to the normal path and bypass the 9.3 CommonCfg status/time anomaly handler
+sbin/sscamerad	0xcff2d	0a442423	90909090	preserve the real MediaBlock::IsAVC1 result and ignore the 9.3 hidden override
 sbin/sscored	0x4e14	0f8c56ffffff	e957ffffff90	turn the deadline branch into an unconditional loop
 sbin/sscored	0x6390	415455	31c0c3	periodic license-maintenance thread: return success
 sbin/ssdaemonmonitord	0x7816	01	00	disable the periodic monitor flag

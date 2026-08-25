@@ -35,14 +35,16 @@ This checks:
 5. unchanged file sizes and x86_64 ELF headers;
 6. the baseline, modified, and human-readable diff support artifacts.
 
-The compatibility work is statically verified. A real DSM run is still required to confirm package start, camera availability, recording, playback, and the license display on the target NAS.
+The compatibility work is statically verified. A real DSM run is still required to confirm package start, camera availability, recording, playback, and the license display on the target NAS. In particular, the follow-up `sscamerad` candidate must run beyond 3000 seconds and complete at least two MP4 rotations.
 
 ## Patch design notes
 
-- Six files contain fixed-width changes: `libssutils.so`, `sscmshostd`, `sscored`, `ssdaemonmonitord`, `ssroutined`, and `ssmessaged`.
-- `libssffmpegutils.so`, `sscamerad`, and `ssexechelperd` are included unchanged because the direct successors of the 9.2.5 patched branches already follow the old patched destinations. Two separate 9.3.0 `sscamerad` 93600-second predicates—including newly introduced AVC1 handling—are intentionally left intact rather than treated as mechanical replacements for the deleted gates.
-- In `sscamerad`, the old first gate's successor now jumps directly from VA `0x4B5735` to the old patched destination at VA `0x4B56B9`. The old second caller gate is absent after VA `0x4D4C82`; the later `IsAVC1`/`SetAVC1` predicate is new to 9.3.0 (those symbols do not exist in 9.2.5), so it is not rewritten by this compatibility patch.
+- Seven files contain fixed-width changes: `libssutils.so`, `sscmshostd`, `sscamerad`, `sscored`, `ssdaemonmonitord`, `ssroutined`, and `ssmessaged`.
+- Follow-up testing reproduced a recording failure at approximately 3000 seconds while RTSP and real IDR frames continued. The timing matches an approximately 1800-second segment boundary plus the 1200-second `StmMuxerExec::ChkExceedTimeClosing` grace period.
+- The `sscamerad` candidate keeps the 1200-second safety timeout intact. It instead jumps over the 9.3 CommonCfg anomaly handler at file offset `0xB58A9`, and at `0xCFF2D` preserves the actual `MediaBlock::IsAVC1()` result rather than OR-ing in the hidden override.
+- `libssffmpegutils.so` and `ssexechelperd` remain unchanged because their direct 9.2.5 gate successors already follow the normal path.
 - `BINARY_DIFF.tsv` is the human-readable offset table; `patch-manifest.json` is the machine-verifiable source of truth.
+- See `REGRESSION-3000S.md` for evidence, decision boundaries, and the live acceptance test.
 
 ## Rollback
 

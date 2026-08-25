@@ -64,8 +64,20 @@ for name, expected in (
     actual = (support / name).read_text(encoding="utf-8")
     if actual != expected:
         raise SystemExit(f"support artifact does not match manifest: {support / name}")
+
+cam = (payload / "sbin/sscamerad").read_bytes()
+if cam[0xB58A9:0xB58AB] != bytes.fromhex("eb45"):
+    raise SystemExit("sscamerad normal-path jump bytes do not match")
+jump_target = 0xB58AB + int.from_bytes(cam[0xB58AA:0xB58AB], "little", signed=True)
+if jump_target != 0xB58F0:
+    raise SystemExit(f"sscamerad normal-path jump target is {jump_target:#x}, expected 0xb58f0")
+if cam[0xCFF2D:0xCFF31] != bytes.fromhex("90909090"):
+    raise SystemExit("sscamerad AVC1 override removal does not match")
+if cam[0xD6882:0xD6888] != bytes.fromhex("81feaf040000") or cam[0xD688F:0xD6891] != bytes.fromhex("7e3f"):
+    raise SystemExit("sscamerad 1200-second safety timeout changed unexpectedly")
 print(f"OK activated.sh resolver payload: {manifest['version']} {manifest['architecture']} ({len(script_files)} files)")
 print("OK support artifacts: BASELINE_SHA256SUMS MODIFIED_SHA256SUMS BINARY_DIFF.tsv")
+print("OK sscamerad regression guard: normal-path target=0xb58f0, real IsAVC1 preserved, 1200-second timeout intact")
 PY
 
 echo "OK support verification complete"
