@@ -1,6 +1,7 @@
 # Verification record — 9.3.0-12139 x86_64
 
 - Date: 2026-08-21 (Asia/Shanghai)
+- Follow-up candidate: 2026-08-25 (approximately 3000-second recording regression)
 - Baseline commit: `b168413c9793f97883739d1c4031f596b0ccac18`
 - Input: `official/9.3.0-12139/SurveillanceStation-x86_64-9.3.0-12139`
 - Output: `patch/9.3.0-12139/SurveillanceStation-x86_64-9.3.0-12139`
@@ -43,7 +44,7 @@ Literal output and exit status:
 OK lib/libssutils.so: size=6463749 changed_bytes=63 sha256=1a1da8e6b161474e7693553f774e23df9542a98cd00929c8b789c77f6a1231e5
 OK lib/libssffmpegutils.so: size=487984 changed_bytes=0 sha256=4dab20d159402d6b66696ac16cd4748d76f66c1a30ec7d7345c2347a2761fe66
 OK sbin/sscmshostd: size=409715 changed_bytes=6 sha256=5bf9d50ce939e75446e6b652d9c6b42c97e65d03f9ab5cfc57261a0c1686d5d8
-OK sbin/sscamerad: size=1209267 changed_bytes=0 sha256=073cf6f19e977202aadf333767c03e527d9ccd162f5aa7a8899925fe0149d588
+OK sbin/sscamerad: size=1209267 changed_bytes=6 sha256=616d97a0e86f120fb0b80ec176fca9384f02cb7d3d596a13e760a9b7a1009861
 OK sbin/sscored: size=46033 changed_bytes=7 sha256=b8985f191a32776be1d3443d783fe431165b654e68f00a17a3a5037623b9b316
 OK sbin/ssdaemonmonitord: size=95643 changed_bytes=1 sha256=04748b34b631476715f45c971e6ef1994cbea0dd51f4efa94122a5007863029c
 OK sbin/ssexechelperd: size=132563 changed_bytes=0 sha256=5909312180fce8ee604f1135acd3e447f260a6e7f572340a7a217730b5cd2ab4
@@ -52,6 +53,7 @@ OK sbin/ssmessaged: size=309659 changed_bytes=3 sha256=a0c34be56bf864a79bdbd413d
 OK SHA256SUMS: patch/9.3.0-12139/SurveillanceStation-x86_64-9.3.0-12139/SHA256SUMS
 OK activated.sh resolver payload: 9.3.0-12139 x86_64 (9 files)
 OK support artifacts: BASELINE_SHA256SUMS MODIFIED_SHA256SUMS BINARY_DIFF.tsv
+OK sscamerad regression guard: normal-path target=0xb58f0, real IsAVC1 preserved, 1200-second timeout intact
 OK support verification complete
 EXIT_STATUS=0
 ```
@@ -91,6 +93,8 @@ OK lib/libssutils.so@0x589dc2=6f6d000000000000000000000000
 OK lib/libssutils.so@0x589e08=3139322e3136382e3235302e3235300000000000000000000000000000
 OK sbin/sscmshostd@0x225e0=31c0c3
 OK sbin/sscmshostd@0x23540=31c0c3
+OK sbin/sscamerad@0xb58a9=eb45
+OK sbin/sscamerad@0xcff2d=90909090
 OK sbin/sscored@0x4e14=e957ffffff90
 OK sbin/sscored@0x6390=31c0c3
 OK sbin/ssdaemonmonitord@0x7816=00
@@ -102,17 +106,17 @@ EXIT_STATUS=0
 
 ## 4. Rollback and reapply
 
-Input fixture: a byte-for-byte copy of the modified payload at `/tmp/ss12139-rollback.t18zZn`.
+Input fixture: a byte-for-byte copy of the modified payload at `/tmp/ss12139-regression.nLiRPg`.
 
 Commands:
 
 ```bash
-support/9.3.0-12139-x86_64/rollback.sh /tmp/ss12139-rollback.t18zZn
-support/9.3.0-12139-x86_64/reapply.sh /tmp/ss12139-rollback.t18zZn
+support/9.3.0-12139-x86_64/rollback.sh /tmp/ss12139-regression.nLiRPg
+support/9.3.0-12139-x86_64/reapply.sh /tmp/ss12139-regression.nLiRPg
 diff -qr \
   patch/9.3.0-12139/SurveillanceStation-x86_64-9.3.0-12139 \
-  /tmp/ss12139-rollback.t18zZn/patch/9.3.0-12139/SurveillanceStation-x86_64-9.3.0-12139
-echo 'OK rollback/reapply byte-identical'
+  /tmp/ss12139-regression.nLiRPg/patch/9.3.0-12139/SurveillanceStation-x86_64-9.3.0-12139
+echo 'OK regression rollback/reapply byte-identical'
 printf 'EXIT_STATUS=%s\n' "$?"
 ```
 
@@ -121,10 +125,10 @@ Literal output and exit status:
 ```text
 OK rollback: patch/9.3.0-12139/SurveillanceStation-x86_64-9.3.0-12139 -> .rollback/9.3.0-12139-x86_64
 OK reapply: .rollback/9.3.0-12139-x86_64 -> patch/9.3.0-12139/SurveillanceStation-x86_64-9.3.0-12139
-OK rollback/reapply byte-identical
+OK regression rollback/reapply byte-identical
 EXIT_STATUS=0
 ```
 
 ## Runtime boundary
 
-The record above is deterministic static verification. It does not claim a completed DSM deployment. Live closure requires the target NAS to show package start success, nine replaced-file hashes, camera availability, an actual recording/playback check, and the expected license display; `./activated.sh -r` is the package-file rollback path.
+The record above is deterministic static verification. It does not claim a completed DSM deployment. Live closure requires the target NAS to show package start success, nine replaced-file hashes, camera availability, continuous recording beyond 3000 seconds, at least two successful MP4 rotations, playback of files on both sides of the old failure boundary, and the expected license display; `./activated.sh -r` is the package-file rollback path.

@@ -91,9 +91,22 @@
     {
       "path": "sbin/sscamerad",
       "baseline_sha256": "073cf6f19e977202aadf333767c03e527d9ccd162f5aa7a8899925fe0149d588",
-      "patches": [],
-      "note": "the direct successors of the two 9.2.5 patched gates already enter the old patched destinations; separate 9.3.0 93600-second and AVC1 predicates are intentionally unchanged",
-      "patched_sha256": "073cf6f19e977202aadf333767c03e527d9ccd162f5aa7a8899925fe0149d588"
+      "patches": [
+        {
+          "offset": "0xb58a9",
+          "expected": "751d",
+          "replacement": "eb45",
+          "note": "jump directly to the normal path and bypass the 9.3 CommonCfg status/time anomaly handler"
+        },
+        {
+          "offset": "0xcff2d",
+          "expected": "0a442423",
+          "replacement": "90909090",
+          "note": "preserve the real MediaBlock::IsAVC1 result and ignore the 9.3 hidden override"
+        }
+      ],
+      "note": "follow-up candidate for the approximately 3000-second MP4 rotation regression; bypasses 9.3 CommonCfg/AVC1 anomaly overrides without changing the 1200-second muxer safety timeout",
+      "patched_sha256": "616d97a0e86f120fb0b80ec176fca9384f02cb7d3d596a13e760a9b7a1009861"
     },
     {
       "path": "sbin/sscored",

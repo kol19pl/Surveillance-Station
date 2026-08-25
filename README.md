@@ -35,6 +35,7 @@ If this code helps and you wish to support me:
 - Variant: standard Synology NAS package (non-DVA)
 - Payload: `patch/9.3.0-12139/SurveillanceStation-x86_64-9.3.0-12139`
 - Reproducible byte-patch manifest: `support/9.3.0-12139-x86_64/patch-manifest.json`
+- 3000-second recording regression analysis: `support/9.3.0-12139-x86_64/REGRESSION-3000S.md`
 - Static verification:
 
 ```shell
@@ -45,6 +46,7 @@ python3 tools/build_binary_patch.py \
 
 The existing `activated.sh` version/architecture resolver detects this directory without a script change.
 Before this branch is pushed or merged, use the offline workflow below; an online run still reads the configured remote `REPO`/`BRANCH`.
+The follow-up `sscamerad` payload is a runtime candidate and needs a continuous recording/file-rotation test beyond 3000 seconds before release closure.
 
 ---
 ### 破解授权 Crack License
@@ -99,4 +101,3 @@ chmod +x activated.sh
 ---
 ### 破解60授权
 ![License](https://raw.githubusercontent.com/ohyeah521/Surveillance-Station/main/img/crack_license.png)
-
